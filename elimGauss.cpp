@@ -1,58 +1,109 @@
-#include <iostream>
-#include <Eigen/Dense>
 
-// Fazer a troca de linhas caso o pivô seja zero (evitar divisão por zero)
-void swapLines(Eigen::MatrixXd A, Eigen::VectorXd b,int n,int max){
+#include <bits/stdc++.h>
+#include <omp.h>
+using namespace std;
 
-  while(n<= max){
-    if (A(n+1,n+1) != 0){
-      Eigen::VectorXd temp = A.row(n+1);
-      A.row(n+1) = A.row(n);
-      A.row(n) = temp;
-      double temp1 = b(n+1);
-      b(n+1) = b(n);
-      b(n) = temp1;
-      break;
-    }
-    n++;
-  }
-}
 
 int main() {
   // Define o tamanho do sistema linear (número de equações e variáveis)
-  const int max = 3;
+  const int size = 3;
 
   // Cria a matriz de coeficientes A (n x n)
-  Eigen::MatrixXd A(max, max);
+  // Eigen::MatrixXd A(size, size);
+  vector<vector<double>> A(size, vector<double>(size));
+  vector<double> b(size);
+  vector<double> x(size);
+
 
   // Cria o vetor de termos independentes b (n x 1)
-  Eigen::VectorXd b(max);
+  // Eigen::VectorXd b(size);
 
-  // Inicializa a matriz A e o vetor b com valores
-  A << 2, 1, 1,
-       1, 3, 2,
-       1, 0, 4;
+  // Preenche a matriz A e o vetor b com valores aleatórios
+  // srand(time(0));
+  // #pragma omp parallel for
+  // for (int i = 0; i < size; i++) {
+  //   #pragma omp parallel for
+  //   for (int j = 0; j < size; j++) {
+  //     A[i][j] = rand() % 100 + 1;
+  //   }
+  //   b[i] = rand() % 100 + 1;
+  // }
 
-  b << 4, 5, 6;
-  int n = 0;
+  A = { {1, 0, 1},
+        {0, 1, 0},
+        {0, 0, 2}};
 
-  while(n<max){
-    double pivo = A(n,n);
-    if(pivo == 0){
-      swapLines(A,b,n,max);
-      pivo = A(n,n); // pivô mudará em caso de swap
+  b = {1, 2, 3};
+
+  auto start = omp_get_wtime();
+
+  for(int i = 0; i<size; i++){
+    double pivot = A[i][i];
+    if(pivot == 0){
+      int j = 0;
+      while(i+j<size){
+        if(A[i][i+j++]!=0) break;
+      }
+      if(i+j == size) {
+        cout << "Sistema sem solução" << endl;
+        return 0;
+      }
+      #pragma omp parallel for
+      for(int k = 0; k<size; k++){
+        swap(A[i][k], A[i+j][k]);
+      }
+      swap(x[i], x[i+j]);
+      swap(b[i], b[i+j]);
     }
-    A.row(n) = A.row(n)/pivo;
-    b(n) = b(n)/pivo;
-    for (int i = n+1; i < max; i++) { 
-      double fator = A(i, n);
-      Eigen::VectorXd temp = A.row(n);
-      A.row(i) -= temp*fator;
-      b(i) -= b(n) * fator;
+
+    #pragma omp parallel for
+      for(int j = i+1; j<size; j++){
+        double aux = A[j][i]/A[i][i];
+        #pragma omp parallel for
+      for(int k=size-1; k>=i; k--){
+        A[j][k] -= A[i][k]*aux;
+      }
     }
-    n++;
+
   }
-  std::cout << "Matrix:\n" << A << std::endl;
-  std::cout << "Vetor:\n" << b << std::endl;
+
+
+  // Perform back substitution to find the solution vector x
+  for (int i = size - 1; i >= 0; i--) {
+    x[i] = b[i];
+    for (int j = i + 1; j < size; j++) {
+      x[i] -= A[i][j] * x[j];
+    }
+    x[i] /= A[i][i];
+  }
+
+  auto end = omp_get_wtime();
+
+  cout << "Matriz A:\n";
+  for(int i = 0; i<size; i++){
+    for(int j = 0; j<size; j++){
+      cout << A[i][j] << " ";
+    }
+    cout << '\n';
+  }
+  cout << '\n';
+
+
+  cout << "Vetor b:\n";
+  for (int i = 0; i < size; i++) {
+    cout << b[i] << " ";
+  }
+  cout << '\n';
+
+  cout << "Vetor x (solução):\n";
+  for (int i = 0; i < size; i++) {
+    cout << x[i] << " ";
+  }
+  cout << '\n';
+
+  cout << "Tempo de execução: " << end-start << "s" << endl;
+
+  // cout << "Matrix:\n" << A << endl;
+  // cout << "Vetor:\n" << b << endl;
   return 0;
 }
