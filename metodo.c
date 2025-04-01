@@ -93,18 +93,15 @@ void jacobi(double A[N][N], double B[N], double X[N]) {
             }
         }
 
-        // Se convergiu, finaliza o Jacobi
         if (convergiu) {
             printf("%d iteracoes\n", k);
             return;
         }
 
-        // Atualiza Xo para a próxima iteração
         for (i = 0; i < N; i++) {
             Xo[i] = X[i];
         }
-
-        k++; // Incrementa iteração
+        k = k + 1; 
     }
 
     printf("Numero maximo de iteracoes atingido.\n");
