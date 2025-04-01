@@ -67,45 +67,6 @@ void gaussSeidel(double A[N][N], double B[N], double X[N]) {
 
     printf("Numero maximo de iteracoes atingido.\n");
 }
-void jacobi(double A[N][N], double B[N], double X[N]) {
-    double Xo[N];  
-    int i, j;
-    int k = 1;
-
-    for (i = 0; i < N; i++) {
-        Xo[i] = X[i];
-    }
-    while (k < iteracoes_max) {
-        for (i = 0; i < N; i++) {
-            double soma = 0.0;
-            for (j = 0; j < N; j++) {
-                if (j != i) {
-                    soma += A[i][j] * X[j] / A[i][i];
-                }
-            }
-            X[i] = (B[i] / A[i][i]) - soma;
-        }
-        int convergiu = 1;
-        for (i = 0; i < N; i++) {
-            if (fabs(X[i] - Xo[i]) > TOL) {
-                convergiu = 0;
-                break;
-            }
-        }
-
-        if (convergiu) {
-            printf("%d iteracoes\n", k);
-            return;
-        }
-
-        for (i = 0; i < N; i++) {
-            Xo[i] = X[i];
-        }
-        k = k + 1; 
-    }
-
-    printf("Numero maximo de iteracoes atingido.\n");
-}
 
 int main() {
     double A[N][N] = { {3, -1, -1}, {-1, 3, -1}, {-1, -1, 3} };
@@ -113,7 +74,7 @@ int main() {
     double X[N] = {1, 1, 1}; 
 
     if (convergencia(A)) { 
-        jacobi(A, B, X);
+        gaussSeidel(A, B, X);
     } else {
         printf("A matriz não é diagonalmente dominante. Métodos iterativos podem não convergir.\n");
     }
