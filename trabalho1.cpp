@@ -11,3 +11,4 @@
 
 using namespace std;
 
+// acho que a gente pode fazer 2 funções principais e as auxiliares que forem necessárias

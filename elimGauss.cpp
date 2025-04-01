@@ -1,5 +1,8 @@
 
-#include <bits/stdc++.h>
+//#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <algorithm>
 #include <omp.h>
 using namespace std;
 
@@ -31,42 +34,47 @@ int main() {
 
   A = { {1, 0, 1},
         {0, 1, 0},
-        {0, 0, 2}};
+        {1, 0, 2}};
 
   b = {1, 2, 3};
 
-  auto start = omp_get_wtime();
+  //auto start = omp_get_wtime();
 
   for(int i = 0; i<size; i++){
-    double pivot = A[i][i];
-    if(pivot == 0){
-      int j = 0;
-      while(i+j<size){
-        if(A[i][i+j++]!=0) break;
+    // Check if the pivot element is zero, if so, swap with a non-zero row
+    if(A[i][i] == 0) {
+      int swap_row = -1;
+      for(int j = i + 1; j < size; j++) {
+        if(A[j][i] != 0) {
+          swap_row = j;
+          break;
+        }
       }
-      if(i+j == size) {
+      if(swap_row == -1) {
         cout << "Sistema sem solução" << endl;
         return 0;
       }
-      #pragma omp parallel for
-      for(int k = 0; k<size; k++){
-        swap(A[i][k], A[i+j][k]);
-      }
-      swap(x[i], x[i+j]);
-      swap(b[i], b[i+j]);
+
+      swap(A[i], A[swap_row]);
+      swap(b[i], b[swap_row]);
     }
 
-    #pragma omp parallel for
-      for(int j = i+1; j<size; j++){
-        double aux = A[j][i]/A[i][i];
-        #pragma omp parallel for
-      for(int k=size-1; k>=i; k--){
-        A[j][k] -= A[i][k]*aux;
+    double pivot = A[i][i];
+    for(int j = i; j < size; j++) {
+      A[i][j] /= pivot;
+    }
+
+    b[i] /= pivot;
+
+    for(int j = i + 1; j < size; j++) {
+      double fator = A[j][i];
+      for(int k = i; k < size; k++) {
+          A[j][k] -= fator * A[i][k];
       }
+      b[j] -= fator * b[i];
     }
 
   }
-
 
   // Perform back substitution to find the solution vector x
   for (int i = size - 1; i >= 0; i--) {
@@ -74,10 +82,9 @@ int main() {
     for (int j = i + 1; j < size; j++) {
       x[i] -= A[i][j] * x[j];
     }
-    x[i] /= A[i][i];
   }
 
-  auto end = omp_get_wtime();
+  //auto end = omp_get_wtime();
 
   cout << "Matriz A:\n";
   for(int i = 0; i<size; i++){
@@ -101,7 +108,7 @@ int main() {
   }
   cout << '\n';
 
-  cout << "Tempo de execução: " << end-start << "s" << endl;
+  //cout << "Tempo de execução: " << end-start << "s" << endl;
 
   // cout << "Matrix:\n" << A << endl;
   // cout << "Vetor:\n" << b << endl;
