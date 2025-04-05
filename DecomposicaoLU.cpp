@@ -6,7 +6,7 @@
 using namespace std;
 
 void DecomposicaoLU(vector<vector<double>> A, vector<double> b){
-    int n = A.size();
+    int n = A.size(); // show de bola essa função size
 
     vector<vector<double>> L(n, vector<double>(n, 0.0));
     vector<vector<double>> U(n, vector<double>(n, 0.0));
@@ -48,6 +48,7 @@ void DecomposicaoLU(vector<vector<double>> A, vector<double> b){
         x[i] /= U[i][i];
     }
 
+    // imprimindo cada elemetno X[i]
     cout << "Solução x:\n";
     for (int i = 0; i < n; i++) {
         std::cout << "x[" << i << "] = " << x[i] << "\n";
@@ -56,6 +57,7 @@ void DecomposicaoLU(vector<vector<double>> A, vector<double> b){
 }
 
 int main() {
+    // testando o exemplo do slide...
     vector<vector<double>> A = {
         {1, 2, 2},
         {4, 4, 2},
