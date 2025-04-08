@@ -69,6 +69,51 @@ vector<double> gaussianElimination(vector<vector<double>> A, vector<double> b) {
     return x;
 }
 
+vector<double> luDecompositionSolve(vector<vector<double>> A, vector<double> b) {
+    int N = A.size();
+    vector<vector<double>> L(N, vector<double>(N, 0));
+    vector<vector<double>> U(N, vector<double>(N, 0));
+    vector<double> y(N, 0), x(N, 0);
+
+    
+    // Decompondo A em L e U
+    for (int i = 0; i < N; i++){
+        for (int j = i; j < N; j++){
+            U[i][j] = A[i][j];
+            for (int k = 0; k < i; k++){
+                U[i][j] -= L[i][k] * U[k][j];
+            }
+        }
+        for (int j = i +1; j < N; j++){
+            L[j][i] = A[j][i];
+            for (int k = 0; k < i; k++){
+                L[j][i] -= L[j][k] * U[k][i];
+            }
+            L[j][i] /= U[i][i];
+        }
+        L[i][i] = 1;
+    }
+
+    // Ly = b
+    for (int i = 0; i < N; i++) {
+        y[i] = b[i];
+        for (int j = 0; j < i; j++) {
+            y[i] -= L[i][j] * y[j];
+        }
+    }
+
+    // Ux = y
+    for (int i = N - 1; i >= 0; i--) {
+        x[i] = y[i];
+        for (int j = i + 1; j < N; j++) {
+            x[i] -= U[i][j] * x[j];
+        }
+        x[i] /= U[i][i];
+    }
+
+    return x;
+}
+
 vector<double> gaussSeidel(vector<vector<double>> A, vector<double> B, vector<double> X, double TOL, int iteracoes_max) {
     int N = A.size();
     vector<double> Xo = X;
@@ -133,6 +178,7 @@ int main() {
     cout << "Escolha o metodo:\n";
     cout << "1 - Gauss-Seidel (Iterativo)\n";
     cout << "2 - Eliminacao de Gauss (Direto)\n";
+    cout << "3 - Fatoracao LU (Direto)\n";
     cin >> escolha;
 
     vector<double> resultado;
@@ -148,6 +194,8 @@ int main() {
         }
     } else if (escolha == 2) {
         resultado = gaussianElimination(A, B);
+    } else if (escolha == 3) {
+        resultado = luDecompositionSolve(A, B);
     } else {
         cout << "Opcao invalida.\n";
         return 1;
