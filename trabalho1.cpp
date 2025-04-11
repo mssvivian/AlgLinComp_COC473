@@ -97,8 +97,9 @@ vector<double> luDecompositionSolve(vector<vector<double>> A, vector<double> b)
             A[i][k] = A[i][k] / A[k][k];
         }
 #pragma omp parallel for
-        for (int j = k + 1; j < n; j++)
-        {
+for (int j = k + 1; j < n; j++)
+{
+            #pragma omp parallel for
             for (int i = k + 1; i < n; i++)
             {
                 A[i][j] = A[i][j] - A[i][k] * A[k][j];
